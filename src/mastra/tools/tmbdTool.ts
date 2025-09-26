@@ -58,8 +58,22 @@ const getMovie = async (genre?: string, mood?: string, decade?: string) => {
   
   if (mood) params.append('with_keywords', mood);
   if (decade) {
-    params.append('primary_release_date.gte', `${decade}-01-01`);
-    params.append('primary_release_date.lte', `${decade}-12-31`);
+    // Handle decade format like "1990s" -> 1990-1999
+    let startYear: string, endYear: string;
+    
+    if (decade.includes('s')) {
+      // Extract the decade (e.g., "1990s" -> "1990")
+      const decadeNum = decade.replace('s', '');
+      startYear = decadeNum;
+      endYear = (parseInt(decadeNum) + 9).toString();
+    } else {
+      // Single year provided
+      startYear = decade;
+      endYear = decade;
+    }
+    
+    params.append('primary_release_date.gte', `${startYear}-01-01`);
+    params.append('primary_release_date.lte', `${endYear}-12-31`);
   }
   
   const url = `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.TMDB_API_KEY}&${params.toString()}`;

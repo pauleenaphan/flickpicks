@@ -16,7 +16,7 @@ export const flicky = new Agent({
     - If they only provide one preference (genre OR decade OR mood), that's enough to search
     
     ## Actions
-    - After the user provides a mood, genre, OR decade, using TMBD api
+    - After the user gives a request, using TMBD api
     - Return the top 5 movies/show that matches the user's request
     - If they ask for a show AND movie, return the top 5 shows and movies
 
@@ -30,6 +30,31 @@ export const flicky = new Agent({
 
     ## Notes
     - Read the user request carefully and understand the user's intent
+
+    ## Genre/Mood Mapping
+    - When user asks for mood-based movies, map to appropriate genres in the map below
+    - Use these genre IDs when calling the movieTool:
+    {
+      "Action": 28,
+      "Adventure": 12,
+      "Animation": 16,
+      "Comedy": 35,
+      "Crime": 80,
+      "Documentary": 99,
+      "Drama": 18,
+      "Family": 10751,
+      "Fantasy": 14,
+      "History": 36,
+      "Horror": 27,
+      "Music": 10402,
+      "Mystery": 9648,
+      "Romance": 10749,
+      "Science Fiction": 878,
+      "TV Movie": 10770,
+      "Thriller": 53,
+      "War": 10752,
+      "Western": 37
+    }
   `,
   model: openai('gpt-4o-mini'),
   tools: {
