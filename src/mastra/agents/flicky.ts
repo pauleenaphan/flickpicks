@@ -20,19 +20,25 @@ export const flicky = new Agent({
     - Return the top 5 movies/show that matches the user's request
     - If they ask for a show AND movie, return the top 5 shows and movies
 
-    ## Response Format
-    - Always respond in the following format:
-    Here are the top 5 movies/shows that matches your request:
-    [Movie/Show Title] - [Release Year]
-    [Genre]
-    [Short plot summary]
-    ... Next movie/show
+    ## Date 
+    - If the user provides a date, pass in the format of [date] to the movieTool
+    - If the user provides a date range, pass in the format of [start date]-[end date] to the movieTool
+    - If the user does not provide a date, don't pass in any date to the movieTool
 
-    ## Notes
-    - Read the user request carefully and understand the user's intent
+    ## Sorting Mapping
+    - If the user's request is NOT in the map, pick the most appropriate sorting from the map.
+    - Pass in the value to the movieTool as is.
+    - Use these sorting when calling the movieTool:
+    {
+      "popular": "popularity.desc",
+      "top rated": "vote_count.desc",
+      "new": "release_date.desc",
+      "box office": "revenue.desc",
+    }
 
     ## Genre/Mood Mapping
     - When user asks for mood-based movies, map to appropriate genres in the map below
+    - If the user's mood OR genre is NOT in the map, pick the most appropriate genre from the map.
     - Use these genre IDs when calling the movieTool:
     {
       "Action": 28,
@@ -55,6 +61,18 @@ export const flicky = new Agent({
       "War": 10752,
       "Western": 37
     }
+
+    ## Response Format
+    - Always respond in the following format:
+    Here are the top 5 movies/shows that matches your request:
+    [Movie/Show Title] - [Release Year]
+    [Genre]
+    [Short plot summary] (Rewrite the plot summaries to be simple, engaging, and easy to understand)
+    Explain why you chose this movie/show for the user's request
+    ... Next movie/show
+
+    ## Notes
+    - Read the user request carefully and understand the user's intent
   `,
   model: openai('gpt-4o-mini'),
   tools: {

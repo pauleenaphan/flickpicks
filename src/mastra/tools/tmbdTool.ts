@@ -20,8 +20,10 @@ export const movieTool = createTool({
   description: 'Get 5 movies from the TMBD API',
   inputSchema: z.object({
     genre: z.string().describe('The genre to get, get the genre id from the genreId object').optional(),
-    mood: z.string().describe('The mood to get').optional(),
+    keywords: z.string().describe('Keywords to search for (e.g., "friendship", "betrayal", "uplifting")').optional(),
     decade: z.string().describe('The decade to get').optional(),
+    amount: z.number().describe('Number of movies to return (default: 5)').optional(),
+    sort: z.string().describe('How to sort results (e.g., "popular", "top rated", "new")').optional(),
   }),
   outputSchema: z.object({
     movies: z.array(z.object({
@@ -32,55 +34,107 @@ export const movieTool = createTool({
     }))
   }),
   execute: async ({ context }) => {
-    return await getMovie(context.genre, context.mood, context.decade);
+    return await getMovie(context.genre, context.keywords, context.decade, context.amount, context.sort);
   },
 })
 
-// Calls the TMBD API and returns the top 5 movies
-const getMovie = async (genre?: string, mood?: string, decade?: string) => {
-  console.log('Environment variables:', {
-    TMDB_API_KEY: process.env.TMDB_API_KEY ? 'SET' : 'NOT SET',
-    NODE_ENV: process.env.NODE_ENV
-  });
-  
+// Main function to get movies from TMDB API
+const getMovie = async (genre?: string, keywords?: string, decade?: string, amount?: number, sort?: string) => {
   if (!process.env.TMDB_API_KEY) {
     throw new Error('TMDB_API_KEY not set');
   }
 
   const params = new URLSearchParams();
   
-  // Convert genre name to ID
-  if (genre) {
-    const genreKey = genre.charAt(0).toUpperCase() + genre.slice(1).toLowerCase();
-    const genreIdValue = genreId[genreKey as keyof typeof genreId];
-    if (genreIdValue) params.append('with_genres', genreIdValue.toString());
-  }
+  // Build API parameters
+  addGenreFilter(params, genre);
+  addKeywordFilters(params, keywords);
+  addDecadeFilter(params, decade);
+  addSortingAndPagination(params, sort);
   
-  if (mood) params.append('with_keywords', mood);
-  if (decade) {
-    // Handle decade format like "1990s" -> 1990-1999
-    let startYear: string, endYear: string;
-    
-    if (decade.includes('s')) {
-      // Extract the decade (e.g., "1990s" -> "1990")
-      const decadeNum = decade.replace('s', '');
-      startYear = decadeNum;
-      endYear = (parseInt(decadeNum) + 9).toString();
-    } else {
-      // Single year provided
-      startYear = decade;
-      endYear = decade;
-    }
-    
-    params.append('primary_release_date.gte', `${startYear}-01-01`);
-    params.append('primary_release_date.lte', `${endYear}-12-31`);
-  }
-  
+  // Make API call
   const url = `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.TMDB_API_KEY}&${params.toString()}`;
+  console.log('🎬 Final API Call:', url);
   const response = await fetch(url);
   const data = await response.json();
   
-  const movies = data.results?.slice(0, 5).map((movie: any) => ({
+  // Process and return results
+  return formatMovieResults(data.results, amount);
+}
+
+// Helper function to add genre filter
+const addGenreFilter = (params: URLSearchParams, genre?: string) => {
+  if (!genre) return;
+  
+  const genreKey = genre.charAt(0).toUpperCase() + genre.slice(1).toLowerCase();
+  const genreIdValue = genreId[genreKey as keyof typeof genreId];
+  if (genreIdValue) {
+    params.append('with_genres', genreIdValue.toString());
+  }
+}
+
+// Helper function to add keyword filters
+const addKeywordFilters = (params: URLSearchParams, keywords?: string) => {
+  if (!keywords) return;
+  
+  const keywordList = keywords
+    .split(/[,\s]+|and|or/i)
+    .map(k => k.trim())
+    .filter(k => k.length > 0);
+  
+  keywordList.forEach(keyword => {
+    params.append('with_keywords', keyword);
+  });
+}
+
+// Helper function to add decade filter
+const addDecadeFilter = (params: URLSearchParams, decade?: string) => {
+  if (!decade) return;
+  
+  let startYear: string, endYear: string;
+  
+  if (decade.includes('s')) {
+    const decadeNum = decade.replace('s', '');
+    startYear = decadeNum;
+    endYear = (parseInt(decadeNum) + 9).toString();
+  } else {
+    startYear = decade;
+    endYear = decade;
+  }
+  
+  params.append('primary_release_date.gte', `${startYear}-01-01`);
+  params.append('primary_release_date.lte', `${endYear}-12-31`);
+}
+
+// Helper function to determine sorting and add pagination
+const addSortingAndPagination = (params: URLSearchParams, sort?: string) => {
+  if (!sort) {
+    sort = getRandomSort();
+  }
+
+  params.append('sort_by', sort);
+
+  // Use page 1 for specific requests, random pages for variety
+  let page: number;
+  if (sort && (sort.includes('top rated') || sort.includes('popular'))) {
+    page = 1; // Get the actual top results
+  } else {
+    page = Math.floor(Math.random() * 5) + 1; // Random page for variety
+  }
+  
+  params.append('page', page.toString());
+}
+
+// Helper function to get random sorting option
+const getRandomSort = (): string => {
+  const sortOptions = ['popularity.desc', 'vote_average.desc', 'release_date.desc', 'revenue.desc'];
+  return sortOptions[Math.floor(Math.random() * sortOptions.length)];
+}
+
+// Helper function to format movie results
+const formatMovieResults = (results: any[], amount?: number) => {
+  const shuffledResults = results?.sort(() => Math.random() - 0.5) || [];
+  const movies = shuffledResults.slice(0, amount || 5).map((movie: any) => ({
     movie: movie.title,
     genre: movie.genre_ids?.map((id: number) => 
       Object.keys(genreId).find(key => genreId[key as keyof typeof genreId] === id)
