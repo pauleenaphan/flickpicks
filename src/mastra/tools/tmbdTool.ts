@@ -31,6 +31,7 @@ export const movieTool = createTool({
       genre: z.string().describe('The movie genre'),
       plot: z.string().describe('The plot of the movie'),
       releaseYear: z.string().describe('The release year of the movie'),
+      vote_average: z.number().describe('The vote average of the movie')
     }))
   }),
   execute: async ({ context }) => {
@@ -45,6 +46,10 @@ const getMovie = async (genre?: string, keywords?: string, decade?: string, amou
   }
 
   const params = new URLSearchParams();
+  
+  // Always filter out non-released movies
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  params.append('primary_release_date.lte', today);
   
   // Build API parameters
   addGenreFilter(params, genre);
@@ -66,6 +71,13 @@ const getMovie = async (genre?: string, keywords?: string, decade?: string, amou
 const addGenreFilter = (params: URLSearchParams, genre?: string) => {
   if (!genre) return;
   
+  // Check if it's already a number (genre ID)
+  if (!isNaN(Number(genre))) {
+    params.append('with_genres', genre);
+    return;
+  }
+  
+  // Otherwise treat as genre name and convert to ID
   const genreKey = genre.charAt(0).toUpperCase() + genre.slice(1).toLowerCase();
   const genreIdValue = genreId[genreKey as keyof typeof genreId];
   if (genreIdValue) {
@@ -110,6 +122,7 @@ const addDecadeFilter = (params: URLSearchParams, decade?: string) => {
 const addSortingAndPagination = (params: URLSearchParams, sort?: string) => {
   if (!sort) {
     sort = getRandomSort();
+    addRandomVoteFilters(params); // Add vote filtering for random sort
   }
 
   params.append('sort_by', sort);
@@ -131,6 +144,12 @@ const getRandomSort = (): string => {
   return sortOptions[Math.floor(Math.random() * sortOptions.length)];
 }
 
+// Helper function to get random movies
+const addRandomVoteFilters = (params: URLSearchParams) => {
+  params.append('vote_average.gte', '1.0');
+  params.append('vote_average.lte', '10.0');
+}
+
 // Helper function to format movie results
 const formatMovieResults = (results: any[], amount?: number) => {
   const shuffledResults = results?.sort(() => Math.random() - 0.5) || [];
@@ -140,7 +159,8 @@ const formatMovieResults = (results: any[], amount?: number) => {
       Object.keys(genreId).find(key => genreId[key as keyof typeof genreId] === id)
     ).filter(Boolean).join(', ') || 'Unknown',
     plot: movie.overview || 'No description available',
-    releaseYear: movie.release_date?.split('-')[0] || 'Unknown'
+    releaseYear: movie.release_date?.split('-')[0] || 'Unknown',
+    vote_average: movie.vote_average || 0
   })) || [];
   
   return { movies };
