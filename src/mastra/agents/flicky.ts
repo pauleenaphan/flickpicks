@@ -1,6 +1,7 @@
 import { Agent } from "@mastra/core/agent"
 import { openai } from "@ai-sdk/openai"
-import { movieTool } from "../tools/tmbdTool"
+import { movieTool } from "../tools/generalSearchTool"
+import { recommendationTool } from "../tools/recommendationTool"
 
 
 export const flicky = new Agent({
@@ -23,6 +24,7 @@ export const flicky = new Agent({
     ## Actions
     - After the user gives a request, use the TMBD api
     - Return the top 5 movies that matches the user's request
+    - If the user has a library and asked for a request based on their library, use the recommendationTool to get the movies
 
     ## Date 
     - If the user provides a date, pass in the format of [date] to the movieTool
@@ -82,6 +84,7 @@ export const flicky = new Agent({
   `,
   model: openai('gpt-4o-mini'),
   tools: {
-    movieTool
+    movieTool,
+    recommendationTool
   }
 })

@@ -4,6 +4,7 @@ import { config } from "dotenv"
 import path from "path"
 
 import { genreId } from "../utils/genreId"
+import { moviesSeen } from "../moviesSeen"
 
 // Load environment variables from project root
 config({ path: path.resolve(process.cwd(), '.env') })
@@ -15,6 +16,7 @@ interface Movie {
   releaseYear: string;
 }
 
+// This tools is used to get movies based on the user's REQUEST
 export const movieTool = createTool({
   id: 'get-movie',
   description: 'Get 5 movies from the TMBD API',
@@ -63,8 +65,22 @@ const getMovie = async (genre?: string, keywords?: string, decade?: string, amou
   const response = await fetch(url);
   const data = await response.json();
   
+  // Filter out seen movies
+  const unseenMovies = data.results.filter((movie: any) => !checkIfMovieHasBeenSeen(movie));
+  console.log('🎬 Unseen Movies:', unseenMovies.length);
+  
+  // If we don't have enough unseen movies, make another API call to get more
+  if (unseenMovies.length < (amount || 5)) {
+    console.log('🎬 Not enough unseen movies, fetching more...');
+    const additionalUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.TMDB_API_KEY}&${params.toString()}&page=${Math.floor(Math.random() * 10) + 2}`;
+    const additionalResponse = await fetch(additionalUrl);
+    const additionalData = await additionalResponse.json();
+    const additionalUnseen = additionalData.results.filter((movie: any) => !checkIfMovieHasBeenSeen(movie));
+    unseenMovies.push(...additionalUnseen);
+  }
+  
   // Process and return results
-  return formatMovieResults(data.results, amount);
+  return formatMovieResults(unseenMovies, amount);
 }
 
 // Helper function to add genre filter
@@ -148,6 +164,10 @@ const getRandomSort = (): string => {
 const addRandomVoteFilters = (params: URLSearchParams) => {
   params.append('vote_average.gte', '1.0');
   params.append('vote_average.lte', '10.0');
+}
+
+const checkIfMovieHasBeenSeen = (movie: any) => {
+  return moviesSeen.some((seenMovie: any) => seenMovie.title === movie.title);
 }
 
 // Helper function to format movie results
