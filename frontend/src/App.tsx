@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 
 import './index.css'
 import { Library } from './library'
-import { Chat } from './chat'
+import Chat from './chat'
 
 function App() {
   const [showLibrary, setShowLibrary] = useState(false)

@@ -1,3 +1,4 @@
+// Searches for a movie using the TMDB API for the user to add to their library
 const searchForMovie = async (query: string) => {
   console.log("search term user is looking for: ", query);
   console.log("api key: ", import.meta.env.VITE_TMDB_API_KEY);
