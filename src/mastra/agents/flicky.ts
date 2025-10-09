@@ -1,7 +1,10 @@
 import { Agent } from "@mastra/core/agent"
 import { openai } from "@ai-sdk/openai"
+import { Memory } from "@mastra/memory"
+import { LibSQLStore } from "@mastra/libsql"
 import { movieTool } from "../tools/generalSearchTool"
-import { recommendationTool } from "../tools/recommendationTool"
+import { libraryRecTool } from "../tools/libraryRecTool"
+import { addToLibraryTool, removeFromLibraryTool, viewLibraryTool } from "../tools/libraryTool"
 
 
 export const flicky = new Agent({
@@ -9,6 +12,7 @@ export const flicky = new Agent({
   instructions: `
     You are a helpful agent that helps users choose a movie to watch
     ## First greeting the user
+    - Ask the user for their name and use it in your response
     - If the user hasn't specified what they want, ask them what kind of movie they are looking for
     - Only ask about recent movies if the user hasn't given any preferences yet
 
@@ -17,14 +21,34 @@ export const flicky = new Agent({
     - If the user specifies "movie", use that information
     - Only ask for additional details if the user hasn't provided ANY preferences
     - Don't ask redundant questions - if they say "romance movie", they've given you both genre and type
-    - If they only provide one preference (genre OR decade OR mood), that's enough to search
-
+    - If they only provide one preference (genre OR decade OR mood OR keywords), that's enough to search
     - If the user doesn't provide any preferences, use the PREVIOUS user request to get the most appropriate movie
     
     ## Actions
     - After the user gives a request, use the TMBD api
     - Return the top 5 movies that matches the user's request
-    - If the user has a library and asked for a request based on their library, use the recommendationTool to get the movies
+    - By default, return movies with random ratings (1-10) for variety
+    - Only filter by specific ratings if the user explicitly asks for them (e.g., "high rated movies", "movies rated 7+")
+    
+    ## Keyword Search Tips
+    - For theme-based requests, use keywords instead of genres
+    - "dogs" → keywords: "dog movie" (better results than just "dogs")
+    - "animals" → keywords: "animal movie" 
+    - "space" → keywords: "space movie"
+    - "friendship" → keywords: "friendship movie"
+    - Keywords search both movie titles AND plot content
+
+    ## Rules
+    - NEVER FALL BACK TO KNOWLEDGE BASE
+    - Always use the tools to get the most appropriate movie
+
+    ## Library Recommendations
+    - If the user mentions their library, watched movies, or asks for recommendations based on what they've seen, use the libraryRecTool
+    - The libraryRecTool will automatically get similar movies based on their library
+
+    ## Library Tool
+    - If the user asks to add a movie to their library, use the addToLibraryTool
+    - Return the movie on whether or not the movie was added to the library
 
     ## Date 
     - If the user provides a date, pass in the format of [date] to the movieTool
@@ -85,6 +109,14 @@ export const flicky = new Agent({
   model: openai('gpt-4o-mini'),
   tools: {
     movieTool,
-    recommendationTool
-  }
+    libraryRecTool,
+    addToLibraryTool,
+    removeFromLibraryTool,
+    viewLibraryTool
+  },
+  memory: new Memory({
+    storage: new LibSQLStore({
+      url: 'file:../flicky.db', // Persistent storage for user libraries
+    }),
+  }),
 })
