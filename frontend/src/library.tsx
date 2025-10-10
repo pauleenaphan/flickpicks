@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaStar, FaTrash } from "react-icons/fa";
+import { FaStar } from "react-icons/fa";
 import { MovieSearchModal } from "./components/MovieSearchModal";
 
 export const Library = () => {

@@ -1,4 +1,3 @@
-import React, { useState } from 'react'
 import { BiSolidCameraMovie } from "react-icons/bi";
 
 import './index.css'

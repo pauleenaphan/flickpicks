@@ -30,7 +30,7 @@ export const movieTool = createTool({
   },
 })
 
-const getMovie = async (context: any, genre?: string, keywords?: string, amount?: number, sort?: string, minRating?: number, maxRating?: number) => {
+const getMovie = async (_context: any, genre?: string, keywords?: string, amount?: number, sort?: string, minRating?: number, maxRating?: number) => {
   // Determine if user wants specific ratings or random
   const hasSpecificRating = minRating !== undefined || maxRating !== undefined;
   

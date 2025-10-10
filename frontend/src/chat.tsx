@@ -155,16 +155,6 @@ export default function Chat() {
     }
   };
 
-  const clearChat = () => {
-    setMessages([]);
-  };
-
-  const resetUser = () => {
-    localStorage.removeItem(`flicky-thread-id`);
-    setMessages([]);
-    window.location.reload(); // Reload to get new thread ID
-  };
-
   // Handle Flicky's localStorage instructions
   const handleFlickyInstruction = (response: string) => {
     console.log('🔍 FLICKY DEBUG - handleFlickyInstruction called with response:', response);
