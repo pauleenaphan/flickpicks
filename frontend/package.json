@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:debug": "echo '🔍 Starting build...' && pwd && ls -la && echo '🔍 Checking src directory...' && ls -la src/ && echo '🔍 Checking if main.tsx exists...' && ls -la src/main.tsx && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
