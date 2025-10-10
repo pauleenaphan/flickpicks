@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { FaStar } from "react-icons/fa";
 import { MovieSearchModal } from "./components/MovieSearchModal";
 
+// Library for the user to manage their movies manually
 export const Library = () => {
   const [userLibrary, setUserLibrary] = useState<any[]>([]);
 

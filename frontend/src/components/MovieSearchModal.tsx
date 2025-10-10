@@ -8,6 +8,7 @@ interface MovieSearchModalProps {
   currentLibrary?: any[];
 }
 
+// Movie search modal for the user to search for movies to add to their library
 export const MovieSearchModal = ({ onMovieAdded, currentLibrary = [] }: MovieSearchModalProps) => {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");

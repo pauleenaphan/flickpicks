@@ -1,4 +1,4 @@
-// Searches for a movie using our secure backend proxy
+// Calls backend api to search for movies
 const searchForMovie = async (query: string) => {
   console.log("search term user is looking for: ", query);
   
