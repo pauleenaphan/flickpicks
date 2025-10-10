@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "mastra dev",
+    "dev": "mastra dev --port 4111",
     "build": "mastra build",
     "start": "mastra start"
   },
@@ -23,6 +23,7 @@
     "@mastra/loggers": "^0.10.12",
     "@mastra/memory": "^0.15.2",
     "dotenv": "^17.2.2",
+    "react-icons": "^5.5.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {

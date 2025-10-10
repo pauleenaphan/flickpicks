@@ -3,18 +3,10 @@ import path from "path";
 
 config({ path: path.resolve(process.cwd(), '.env') });
 
-// TMDB API functions
-const getApiKey = () => {
-  if (!process.env.TMDB_API_KEY) {
-    throw new Error('TMDB_API_KEY not set');
-  }
-  return process.env.TMDB_API_KEY;
-};
-
 // Search for a movie and return exact match or suggestions
 export const searchForMovie = async (title: string) => {
   try {
-    const url = `https://api.themoviedb.org/3/search/movie?api_key=${getApiKey()}&query=${encodeURIComponent(title)}`;
+    const url = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
     const response = await fetch(url);
     const data = await response.json();
     
@@ -41,7 +33,7 @@ export const searchForMovie = async (title: string) => {
 // Keywords only takes in IDs and not actual keywords
 export const searchForKeywords = async (keyword: string) => {
   try {
-    const url = `https://api.themoviedb.org/3/search/keyword?api_key=${getApiKey()}&query=${encodeURIComponent(keyword)}`;
+    const url = `https://api.themoviedb.org/3/search/keyword?api_key=${process.env.TMDB_API_KEY}&query=${encodeURIComponent(keyword)}`;
     const response = await fetch(url);
     const data = await response.json();
     
@@ -109,7 +101,7 @@ export const getMovies = async (options: {
     params.append('primary_release_date.lte', today);
   }
 
-  const url = `https://api.themoviedb.org/3/discover/movie?api_key=${getApiKey()}&${params.toString()}`;
+  const url = `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.TMDB_API_KEY}&${params.toString()}`;
   const response = await fetch(url);
   return response.json();
 };
@@ -122,7 +114,7 @@ const getMoviesWithSearch = async (options: any) => {
     sort_by: options.sortBy || 'popularity.desc'
   });
 
-  const url = `https://api.themoviedb.org/3/search/movie?api_key=${getApiKey()}&${params.toString()}`;
+  const url = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.TMDB_API_KEY}&${params.toString()}`;
   const response = await fetch(url);
   const data = await response.json();
   

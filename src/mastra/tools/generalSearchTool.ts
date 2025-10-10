@@ -1,15 +1,15 @@
 import { createTool } from "@mastra/core/tools"
 import { z } from "zod"
+
 import { genreId } from "../utils/genreId"
 import { getMovies } from "../api/tmdb/utils"
-import { getLibraryFromMemory } from "./libraryTool"
 
 // Gets movies from the TMBD API based on the user's request
 export const movieTool = createTool({
   id: 'get-movie',
   description: 'Get movies from the TMBD API',
   inputSchema: z.object({
-    genre: z.string().describe('The genre to get').optional(),
+    genre: z.string().describe('The genre ID to get (e.g., "28" for Action, "35" for Comedy)').optional(),
     keywords: z.string().describe('Keywords to search for (e.g., "animals", "friendship", "space")').optional(),
     amount: z.number().describe('Number of movies to return (default: 5)').optional(),
     sort: z.string().describe('How to sort results').optional(),
@@ -34,12 +34,8 @@ const getMovie = async (context: any, genre?: string, keywords?: string, amount?
   // Determine if user wants specific ratings or random
   const hasSpecificRating = minRating !== undefined || maxRating !== undefined;
   
-  // Get genre ID if genre is specified
-  let genreIdValue = '';
-  if (genre) {
-    const genreKey = genre.charAt(0).toUpperCase() + genre.slice(1).toLowerCase();
-    genreIdValue = genreId[genreKey as keyof typeof genreId]?.toString() || '';
-  }
+  // Use genre ID directly (Flicky already converted it)
+  const genreIdValue = genre || '';
   
   const data = await getMovies({
     withGenres: genreIdValue,
@@ -52,15 +48,8 @@ const getMovie = async (context: any, genre?: string, keywords?: string, amount?
     randomRating: !hasSpecificRating
   });
   
-  // Get user's library to filter out seen movies
-  const moviesSeen = await getLibraryFromMemory(context);
-  const unseenMovies = data.results?.filter((movie: any) => !checkIfMovieHasBeenSeen(movie, moviesSeen)) || [];
-  
-  return formatMovieResults(unseenMovies, amount);
-}
-
-const checkIfMovieHasBeenSeen = (movie: any, moviesSeen: any[]) => {
-  return moviesSeen.some((seenMovie: any) => seenMovie.movie === movie.title);
+  // Return all results since we can't access localStorage from backend
+  return formatMovieResults(data.results, amount);
 }
 
 const formatMovieResults = (results: any[], amount?: number) => {
