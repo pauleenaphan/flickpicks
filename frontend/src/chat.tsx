@@ -37,9 +37,11 @@ export default function Chat() {
     setIsLoading(true);
 
     // Send the message to the agent by making a POST request to the API and cleaning the response text
+    const apiUrl = import.meta.env.VITE_MASTRA_API_URL || 'http://localhost:4111';
+    
     try {
       // Send only the current message with user ID - let the agent's memory handle the context
-      const res = await fetch(`http://localhost:4111/api/agents/flicky/stream`, {
+      const res = await fetch(`${apiUrl}/api/agents/flicky/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -206,8 +208,9 @@ export default function Chat() {
           // Automatically send library data to Flicky
           setTimeout(async () => {
             console.log('🔍 FLICKY DEBUG - Sending library data to Flicky:', libraryText);
+            const apiUrl = import.meta.env.VITE_MASTRA_API_URL || 'http://localhost:4111';
             try {
-              const libraryResponse = await fetch(`http://localhost:4111/api/agents/flicky/stream`, {
+              const libraryResponse = await fetch(`${apiUrl}/api/agents/flicky/stream`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
