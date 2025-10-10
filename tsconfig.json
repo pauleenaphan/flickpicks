@@ -12,10 +12,10 @@
     "types": ["node"]
   },
   "include": [
-    "mastra/**/*"
+    "src/mastra/**/*"
   ],
   "exclude": [
-    "src/**/*",
+    "frontend/**/*",
     "node_modules/**/*",
     "dist/**/*"
   ]

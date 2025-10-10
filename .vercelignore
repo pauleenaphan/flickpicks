@@ -1,0 +1,10 @@
+../src/
+../node_modules/
+../*.log
+../.env
+../.env.local
+../.env.production.local
+../.env.development.local
+../tsconfig.json
+../package.json
+../package-lock.json
