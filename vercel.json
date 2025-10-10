@@ -1,6 +1,0 @@
-{
-  "buildCommand": "cd frontend && npm ci && npx vite build",
-  "outputDirectory": "frontend/dist",
-  "installCommand": "cd frontend && npm ci",
-  "framework": "vite"
-}
