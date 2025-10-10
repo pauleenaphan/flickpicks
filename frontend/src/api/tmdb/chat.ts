@@ -1,5 +1,5 @@
 
-import { mastra } from '../../../../src/mastra/index';
+import { mastra } from '../../../../mastra/index';
 
 export async function POST(request: Request) {
   try {
