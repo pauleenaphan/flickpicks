@@ -11,6 +11,9 @@
     "outDir": "dist"
   },
   "include": [
-    "src/**/*"
+    "src/mastra/**/*"
+  ],
+  "exclude": [
+    "frontend/**/*"
   ]
 }
