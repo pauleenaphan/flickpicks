@@ -8,12 +8,15 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "types": ["node"]
   },
   "include": [
     "src/mastra/**/*"
   ],
   "exclude": [
-    "frontend/**/*"
+    "frontend/**/*",
+    "node_modules/**/*",
+    "dist/**/*"
   ]
 }
